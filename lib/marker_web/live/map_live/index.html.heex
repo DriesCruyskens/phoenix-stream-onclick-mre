@@ -1,0 +1,23 @@
+<leaflet-map
+  id="leaflet-map"
+  lat={elem(@view_coords, 0)}
+  lng={elem(@view_coords, 1)}
+  zoom="17"
+  phx-update="stream"
+>
+  <leaflet-marker
+    :for={{dom_id, marker} <- @streams.markers}
+    id={dom_id}
+    lat={marker.lat}
+    lng={marker.lng}
+    phx-click="select_marker"
+    phx-hook="Marker"
+    phx-value-id={marker.id}
+    phx-value-lat={marker.lat}
+    phx-value-lng={marker.lng}
+  >
+    <leaflet-icon icon-url={marker_url(marker, @selected_marker)}></leaflet-icon>
+  </leaflet-marker>
+</leaflet-map>
+
+<.marker_card :if={assigns[:selected_marker]} marker={@selected_marker} />
