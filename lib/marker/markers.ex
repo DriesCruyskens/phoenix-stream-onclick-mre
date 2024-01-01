@@ -7,18 +7,13 @@ defmodule Marker.Markers do
   Returns the list of markers.
   """
   def list_markers do
-    [
+    Enum.map(1..10000, fn x ->
       %Markers.MarkerModel{
-        id: 2,
-        lat: 50.75578222222222,
-        lng: 4.352832222222222,
-      },
-      %Markers.MarkerModel{
-        id: 4,
-        lat: 50.75573222222222,
-        lng: 4.352971944444444,
+        id: x,
+        lat: 50.75578222222222 + (x / 10000),
+        lng: 4.352832222222222
       }
-    ]
+    end)
   end
 
   @doc """

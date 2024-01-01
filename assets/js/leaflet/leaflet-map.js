@@ -32,6 +32,12 @@ class LeafletMap extends HTMLElement {
 
     this.attachShadow({ mode: "open" });
     this.shadowRoot.appendChild(template.content.cloneNode(true));
+
+    this.defaultSlot = this.shadowRoot.querySelector("slot");
+    this.defaultSlot.addEventListener("slotchange", () =>
+      this.slotChange(this)
+    );
+
     this.mapElement = this.shadowRoot.querySelector("div");
 
     this.map = L.map(this.mapElement).setView(
@@ -75,35 +81,51 @@ class LeafletMap extends HTMLElement {
     }).addTo(this.map);
   }
 
-  connectedCallback() {
-    const markerElements = this.querySelectorAll("leaflet-marker");
+  slotChange() {
+    this.markerClusterGroup.clearLayers();
+    Array.from(this.defaultSlot.assignedNodes()).forEach((markerEl) => {
+      if (markerEl.tagName === "LEAFLET-MARKER") {
+        const lat = markerEl.getAttribute("lat");
+        const lng = markerEl.getAttribute("lng");
 
-    this.markerClusterGroup = L.markerClusterGroup({ maxClusterRadius: 40 });
-    markerElements.forEach((markerEl) => {
-      const lat = markerEl.getAttribute("lat");
-      const lng = markerEl.getAttribute("lng");
+        const leafletMarker = L.marker([lat, lng]);
 
-      const leafletMarker = L.marker([lat, lng]);
-      leafletMarker.addEventListener("click", (_event) => {
-        console.log("leaflet marker on click");
-        markerEl.click();
-      });
+        leafletMarker.addEventListener("mousedown", (event) => {
+          event.originalEvent.stopPropagation();
+        });
+        leafletMarker.addEventListener("click", (event) => {
+          event.originalEvent.preventDefault();
+          markerEl.click();
+        });
 
-      const iconEl = markerEl.querySelector("leaflet-icon");
+        const iconEl = markerEl.querySelector("leaflet-icon");
 
-      iconEl.addEventListener("attribute-changed", (e) => {
+        iconEl.addEventListener("attribute-changed", (e) => {
+          leafletMarker.setOpacity(0.8).setIcon(
+            L.icon({
+              iconUrl: e.detail,
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+            })
+          );
+        });
+
         leafletMarker.setOpacity(0.8).setIcon(
           L.icon({
-            iconUrl: e.detail,
+            iconUrl: iconEl.getAttribute("icon-url"),
             iconSize: [25, 41],
             iconAnchor: [12, 41],
           })
         );
-      });
 
-      this.markerClusterGroup.addLayer(leafletMarker);
-      markerEl.marker = leafletMarker;
+        this.markerClusterGroup.addLayer(leafletMarker);
+        markerEl.marker = leafletMarker;
+      }
     });
+  }
+
+  connectedCallback() {
+    this.markerClusterGroup = L.markerClusterGroup({ maxClusterRadius: 40 });
     this.map.addLayer(this.markerClusterGroup);
   }
 }

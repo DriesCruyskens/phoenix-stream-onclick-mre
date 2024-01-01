@@ -1,6 +1,10 @@
 ## Issue
 
-# phx-update=stream does not trigger manual onClick events
+https://github.com/phoenixframework/phoenix_live_view/issues/2940
+
+the fix is not ideal since it requires to reattach the listeners for all markers everytime selected marker is changed. phx-update='append' is more efficient in that regard.
+
+# phx-update=stream does not trigger onClick events
 
 Hello,
 

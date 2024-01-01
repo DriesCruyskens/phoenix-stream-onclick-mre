@@ -20,10 +20,20 @@ defmodule MarkerWeb.MapLive.Index do
 
     {:noreply,
      socket
-     |> stream_insert_if_not_nil(markers, selected_marker)
-     |> stream_insert_if_not_nil(markers, previously_selected_marker)
+     |> insert_markers(markers, selected_marker, previously_selected_marker)
      |> assign(selected_marker: selected_marker)
      |> assign(view_coords: view_coords)}
+  end
+
+  defp insert_markers(socket, _markers, selected_marker, previously_selected_marker)
+       when selected_marker.id == previously_selected_marker.id do
+    socket
+  end
+
+  defp insert_markers(socket, markers, selected_marker, previously_selected_marker) do
+    socket
+    |> stream_insert_if_not_nil(markers, selected_marker)
+    |> stream_insert_if_not_nil(markers, previously_selected_marker)
   end
 
   # Insert changed markers if they are not already in the markers array (to prevent duplicates) and if they are not nil (to prevent error)
